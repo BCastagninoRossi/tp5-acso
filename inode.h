@@ -11,7 +11,7 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp);
 
 /**
  * Given an index of a file block, retrieves the file's actual block number
- * of from the given inode.
+ * from the given inode.
  *
  * Returns the disk block number on success, -1 on error.  
  */
