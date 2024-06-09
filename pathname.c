@@ -17,7 +17,7 @@ int pathname_lookup(struct unixfilesystem *fs, const char *pathname) {
     }
     char* path = pathname + strlen("/");
     int dirnum = ROOT_INUMBER;
-    while (path != '\0'){
+    while (*path != '\0'){
         char* next = strchr(path, '/');
         char* name;
         if (next == NULL){
