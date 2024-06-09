@@ -8,21 +8,42 @@
 /**
  * TODO
  */
+// int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
+//     if (inumber < 1 || inumber > fs->superblock.s_fsize) return -1;
+//     int inode_size = sizeof(struct inode);
+//     int inodes_per_block = DISKIMG_SECTOR_SIZE / inode_size;
+//     int block = (inumber - 1) / inodes_per_block + INODE_START_SECTOR;
+//     int offset = (inumber - 1) % inodes_per_block;
+//     struct inode *inodes = malloc(DISKIMG_SECTOR_SIZE);
+//     if (inodes == NULL) return -1;
+//     if (diskimg_readsector(fs->dfd, block, inodes) == -1) {
+//         free(inodes);
+//         return -1;
+//     }
+//     *inp = inodes[offset];
+//     free(inodes);
+//     return 0;
+// }
+
+
 int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
-    if (inumber < 1 || inumber > fs->superblock.s_fsize) return -1;
-    int inode_size = sizeof(struct inode);
-    int inodes_per_block = DISKIMG_SECTOR_SIZE / inode_size;
-    int block = (inumber - 1) / inodes_per_block + INODE_START_SECTOR;
-    int offset = (inumber - 1) % inodes_per_block;
-    struct inode *inodes = malloc(DISKIMG_SECTOR_SIZE);
-    if (inodes == NULL) return -1;
-    if (diskimg_readsector(fs->dfd, block, inodes) == -1) {
-        free(inodes);
-        return -1;
-    }
-    *inp = inodes[offset];
-    free(inodes);
-    return 0;
+	// get offset of sector and inumber
+	inumber = inumber - 1;		// inumber starts from 1
+	int inode_num = DISKIMG_SECTOR_SIZE / sizeof(struct inode);
+	int sector_offset = inumber / inode_num;
+	int inumber_offset = inumber % inode_num;
+
+	// get contents of a sector
+	int fd = fs->dfd;
+	struct inode inodes[inode_num];
+	int err = diskimg_readsector(fd, INODE_START_SECTOR + sector_offset, inodes);
+	if(err < 0) return -1;
+	
+	// get contents of an inode
+	*inp = inodes[inumber_offset];
+
+	// return
+	return 0;	
 }
 
 /**
