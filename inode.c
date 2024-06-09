@@ -96,8 +96,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
     int16_t indir_block_num = blockNum / 256;
     int16_t offset = blockNum % 256;
     int16_t *indir_block = malloc(DISKIMG_SECTOR_SIZE);
-    if (indir_block == NULL) return -1; // Check if malloc was successful
-
+    if (indir_block == NULL) return -1; 
     if (indir_block_num < 7) {
         if (diskimg_readsector(fs->dfd, inp->i_addr[indir_block_num], indir_block) == -1) {
             free(indir_block);
@@ -110,8 +109,8 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
     }
 
     if (indir_block_num >= 7) {
-        indir_block_num = (blockNum - 7 * 256) / 256;
-        offset = (blockNum - 7 * 256) % 256;
+        int16_t second_indir_block_num = (blockNum - 7 * 256) / 256;
+        int16_t second_offset = (blockNum - 7 * 256) % 256;
 
         if (diskimg_readsector(fs->dfd, inp->i_addr[7], indir_block) == -1) {
             free(indir_block);
@@ -120,24 +119,24 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
             int16_t *second_indir_block = malloc(DISKIMG_SECTOR_SIZE);
             if (second_indir_block == NULL) {
                 free(indir_block);
-                return -1; // Check if malloc was successful
+                return -1;
             }
 
-            if (diskimg_readsector(fs->dfd, indir_block[indir_block_num], second_indir_block) == -1) {
+            if (diskimg_readsector(fs->dfd, indir_block[second_indir_block_num], second_indir_block) == -1) {
                 free(second_indir_block);
                 free(indir_block);
                 return -1;
             }
 
-            int16_t block = second_indir_block[offset];
+            int16_t block = second_indir_block[second_offset];
             free(indir_block);
             free(second_indir_block);
             return block;
         }
     }
 
-    free(indir_block); // Ensure memory is freed in all paths
-    return -1; // Default return value for error cases not covered above
+    free(indir_block); 
+    return -1; 
 }
 
 int inode_getsize(struct inode *inp) {
