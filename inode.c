@@ -32,11 +32,14 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
 //     //Implement code here
 //     int inode_file_size = inode_getsize(inp);
 //     if (inode_file_size == 0) return -1;
+
 //     int inode_blocks = inode_file_size/DISKIMG_SECTOR_SIZE;
 //     if (blockNum < 0 || blockNum >= inode_blocks) return -1;
+
 //     if (inode_file_size <= DISKIMG_SECTOR_SIZE*8){
 //         return inp->i_addr[blockNum];
 //     }
+
 //     int indir_block_num = blockNum / 256;
 //     int offset = blockNum % 256;
 //     int *indir_block = malloc(DISKIMG_SECTOR_SIZE);
@@ -83,7 +86,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
     int inode_file_size = inode_getsize(inp);
     if (inode_file_size == 0) return -1;
 
-    int inode_blocks = (inode_file_size + DISKIMG_SECTOR_SIZE - 1) / DISKIMG_SECTOR_SIZE; // Correcting to ceiling value
+    int inode_blocks = (inode_file_size + DISKIMG_SECTOR_SIZE - 1) / DISKIMG_SECTOR_SIZE;
     if (blockNum < 0 || blockNum >= inode_blocks) return -1;
 
     if (inode_file_size <= DISKIMG_SECTOR_SIZE * 8) {
@@ -92,7 +95,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
 
     int indir_block_num = blockNum / 256;
     int offset = blockNum % 256;
-    int *indir_block = (int *)malloc(DISKIMG_SECTOR_SIZE);
+    int16_t *indir_block = malloc(DISKIMG_SECTOR_SIZE);
     if (indir_block == NULL) return -1; // Check if malloc was successful
 
     if (indir_block_num < 7) {
@@ -114,7 +117,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
             free(indir_block);
             return -1;
         } else {
-            int *second_indir_block = (int *)malloc(DISKIMG_SECTOR_SIZE);
+            int16_t *second_indir_block = malloc(DISKIMG_SECTOR_SIZE);
             if (second_indir_block == NULL) {
                 free(indir_block);
                 return -1; // Check if malloc was successful
