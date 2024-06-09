@@ -15,13 +15,12 @@ int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *bu
     }
     uint64_t size = inode_getsize(&in);
 
-    int real_block_num = inode_indexlookup(fs, &in, blockNum);
+    uint16_t real_block_num = inode_indexlookup(fs, &in, blockNum);
     if (real_block_num < 0){
         return -1;   
     }
-    uint16_t sized_block_num = (uint16_t) real_block_num;
     
-    if (diskimg_readsector(fs->dfd, sized_block_num, buf) <0) {
+    if (diskimg_readsector(fs->dfd, real_block_num, buf) <0) {
         return -1;
     }
 
