@@ -9,7 +9,6 @@
  * TODO
  */
 int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
-    //Implement code here
     if (inumber < 1 || inumber > fs->superblock.s_fsize) return -1;
     int inode_size = sizeof(struct inode);
     int inodes_per_block = DISKIMG_SECTOR_SIZE / inode_size;
@@ -22,7 +21,7 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
     }
     *inp = inodes[offset];
     free(inodes);
-    return 0; 
+    return 0;
 }
 
 /**
