@@ -25,30 +25,6 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
     return 0;
 }
 
-//STANFORD
-// int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
-// 	// get offset of sector and inumber
-// 	inumber = inumber - 1;		// inumber starts from 1
-// 	int inode_num = DISKIMG_SECTOR_SIZE / sizeof(struct inode);
-// 	int sector_offset = inumber / inode_num;
-// 	int inumber_offset = inumber % inode_num;
-
-// 	// get contents of a sector
-// 	int fd = fs->dfd;
-// 	struct inode inodes[inode_num];
-// 	int err = diskimg_readsector(fd, INODE_START_SECTOR + sector_offset, inodes);
-// 	if(err < 0) return -1;
-	
-// 	// get contents of an inode
-// 	*inp = inodes[inumber_offset];
-
-// 	// return
-// 	return 0;	
-// }
-
-/**
- * TODO
- */
 int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum) {  
     int inode_file_size = inode_getsize(inp);
     //if (inode_file_size == 0) return -1;
@@ -63,8 +39,6 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
         inode_blocks++;
     }
     if (blockNum < 0 || blockNum >= inode_blocks) return -1;
-
-
 
     int16_t indir_block_num = blockNum / 256;
     int16_t offset = blockNum % 256;
@@ -100,115 +74,6 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
     }
     return 0;
 }
-
-/////////////////
-///////////////
-// STANFORD
-// int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum) {
-// 	int fd = fs->dfd;
-// 	int is_small_file = ((inp->i_mode & ILARG) == 0);
-
-// 	// if it is a small file
-// 	if(is_small_file) {
-// 		return inp->i_addr[blockNum];
-// 	}	
-
-// 	// if it is a large file
-// 	int addr_num = DISKIMG_SECTOR_SIZE / sizeof(uint16_t);
-// 	int indir_addr_num = addr_num * 7;
-// 	if(blockNum < indir_addr_num) {		// if it only uses INDIR_ADDR
-// 		int sector_offset = blockNum / addr_num;
-// 		int addr_offset = blockNum % addr_num;
-// 		uint16_t addrs[addr_num];
-// 		int err = diskimg_readsector(fd, inp->i_addr[sector_offset], addrs);
-// 		if(err < 0) return -1;	
-// 		return addrs[addr_offset];
-// 	} else {							// if it also uses the DOUBLE_INDIR_ADDR
-// 		// the first layer
-// 		int blockNum_in_double = blockNum - indir_addr_num;
-// 		int sector_offset_1 = 7;
-// 		int addr_offset_1 = blockNum_in_double / addr_num;
-// 		uint16_t addrs_1[addr_num];
-// 		int err_1 = diskimg_readsector(fd, inp->i_addr[sector_offset_1], addrs_1);
-// 		if(err_1 < 0) return -1;
-
-// 		// the second layer
-// 		int sector_2 = addrs_1[addr_offset_1];
-// 		int addr_offset_2 = blockNum_in_double % addr_num;
-// 		uint16_t addrs_2[addr_num];
-// 		int err_2 = diskimg_readsector(fd, sector_2, addrs_2);
-// 		if(err_2 < 0) return -1;
-// 		return addrs_2[addr_offset_2];
-// 	}	
-// }
-
-
-
-///////////////
-
-// int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum) {
-//     int inode_file_size = inode_getsize(inp);
-//     if (inode_file_size == 0) return -1;
-
-//     int inode_blocks = (inode_file_size + DISKIMG_SECTOR_SIZE - 1) / DISKIMG_SECTOR_SIZE;
-//     if (blockNum < 0 || blockNum >= inode_blocks) return -1;
-
-//     if (inode_file_size <= DISKIMG_SECTOR_SIZE * 8) {
-//         return inp->i_addr[blockNum];
-//     }
-
-//     int16_t indir_block_num = blockNum / 256;
-//     int16_t offset = blockNum % 256;
-//     int16_t *indir_block = malloc(DISKIMG_SECTOR_SIZE);
-//     if (indir_block == NULL) return -1; 
-//     if (indir_block_num < 7) {
-//         if (diskimg_readsector(fs->dfd, inp->i_addr[indir_block_num], indir_block) == -1) {
-//             free(indir_block);
-//             return -1;
-//         } else {
-//             int16_t block = indir_block[offset];
-//             free(indir_block);
-//             return block;
-//         }
-//     }
-
-//     if (indir_block_num >= 7) {
-//         int16_t second_indir_block_num = (blockNum - 7 * 256) / 256;
-//         int16_t second_offset = (blockNum - 7 * 256) % 256;
-
-//         if (diskimg_readsector(fs->dfd, inp->i_addr[7], indir_block) == -1) {
-//             free(indir_block);
-//             return -1;
-//         } else {
-//             int16_t *second_indir_block = malloc(DISKIMG_SECTOR_SIZE);
-//             if (second_indir_block == NULL) {
-//                 free(indir_block);
-//                 return -1;
-//             }
-
-//             if (diskimg_readsector(fs->dfd, indir_block[second_indir_block_num], second_indir_block) == -1) {
-//                 free(second_indir_block);
-//                 free(indir_block);
-//                 return -1;
-//             }
-
-//             int16_t block = second_indir_block[second_offset];
-//             free(indir_block);
-//             free(second_indir_block);
-//             return block;
-//         }
-//     }
-
-//     free(indir_block); 
-//     return -1; 
-// }
-
-// int inode_getsize(struct inode *inp) {
-//     return ((inp->i_size0 << 16) | inp->i_size1);
-// }
-// ///////////////
-
-
 
 
 int inode_getsize(struct inode *inp) {
