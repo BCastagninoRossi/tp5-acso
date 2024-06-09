@@ -12,9 +12,10 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
     if (inumber < 1 || inumber > fs->superblock.s_fsize) return -1;
     int inode_size = sizeof(struct inode);
     int inodes_per_block = DISKIMG_SECTOR_SIZE / inode_size;
-    int block = (inumber - 1) / inodes_per_block + INODE_START_SECTOR;
-    int offset = (inumber - 1) % inodes_per_block;
+    int16_t block = (inumber - 1) / inodes_per_block + INODE_START_SECTOR;
+    int16_t offset = (inumber - 1) % inodes_per_block;
     struct inode *inodes = malloc(DISKIMG_SECTOR_SIZE);
+    if (inodes == NULL) return -1;
     if (diskimg_readsector(fs->dfd, block, inodes) == -1) {
         free(inodes);
         return -1;
