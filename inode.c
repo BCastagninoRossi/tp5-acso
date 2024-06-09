@@ -16,9 +16,6 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
     int block = (inumber - 1) / inodes_per_block + INODE_START_SECTOR;
     int offset = (inumber - 1) % inodes_per_block;
     struct inode *inodes = malloc(DISKIMG_SECTOR_SIZE);
-        if (inodes == NULL) {
-        return -1;
-    }
     if (diskimg_readsector(fs->dfd, block, inodes) == -1) {
         free(inodes);
         return -1;
