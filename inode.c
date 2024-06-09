@@ -93,8 +93,8 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
         return inp->i_addr[blockNum];
     }
 
-    int indir_block_num = blockNum / 256;
-    int offset = blockNum % 256;
+    int16_t indir_block_num = blockNum / 256;
+    int16_t offset = blockNum % 256;
     int16_t *indir_block = malloc(DISKIMG_SECTOR_SIZE);
     if (indir_block == NULL) return -1; // Check if malloc was successful
 
@@ -103,7 +103,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
             free(indir_block);
             return -1;
         } else {
-            int block = indir_block[offset];
+            int16_t block = indir_block[offset];
             free(indir_block);
             return block;
         }
@@ -129,7 +129,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
                 return -1;
             }
 
-            int block = second_indir_block[offset];
+            int16_t block = second_indir_block[offset];
             free(indir_block);
             free(second_indir_block);
             return block;
