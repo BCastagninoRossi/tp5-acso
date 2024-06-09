@@ -94,7 +94,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
 
 	// if it is a large file
 	int addr_num = DISKIMG_SECTOR_SIZE / sizeof(uint16_t);
-	int indir_addr_num = addr_num * INDIR_ADDR;
+	int indir_addr_num = addr_num * 7;
 	if(blockNum < indir_addr_num) {		// if it only uses INDIR_ADDR
 		int sector_offset = blockNum / addr_num;
 		int addr_offset = blockNum % addr_num;
@@ -105,7 +105,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
 	} else {							// if it also uses the DOUBLE_INDIR_ADDR
 		// the first layer
 		int blockNum_in_double = blockNum - indir_addr_num;
-		int sector_offset_1 = INDIR_ADDR;
+		int sector_offset_1 = 7;
 		int addr_offset_1 = blockNum_in_double / addr_num;
 		uint16_t addrs_1[addr_num];
 		int err_1 = diskimg_readsector(fd, inp->i_addr[sector_offset_1], addrs_1);
