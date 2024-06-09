@@ -12,5 +12,28 @@
  */
 int pathname_lookup(struct unixfilesystem *fs, const char *pathname) {
     //Implement code here
-	return 0;
+    if (strcmp(pathname, "/") == 0) {
+        return ROOT_INUMBER;
+    }
+    char* path = pathname + strlen("/");
+    int dirnum = ROOT_INUMBER;
+    while (path != '\0'){
+        char* next = strchr(path, '/');
+        char* name;
+        if (next == NULL){
+            name = path;
+        } else {
+            name = strndup(path, next - path);
+        }
+        struct direntv6 dirEnt;
+        if (directory_findname(fs, name, dirnum, &dirEnt) < 0){
+            return -1;
+        }
+        dirnum = dirEnt.d_inumber;
+        if (next == NULL){
+            break;
+        }
+        path = next + strlen("/");
+    }
+    return dirnum;
 }
