@@ -8,57 +8,55 @@
 /**
  * TODO
  */
-// int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *buf) {
-//     struct inode in;
-//     if (inode_iget(fs, inumber, &in) < 0) {
-//         return -1;
-//     }
-//     int64_t size = inode_getsize(&in);
-
-//     int16_t real_block_num = inode_indexlookup(fs, &in, blockNum);
-//     if (real_block_num < 0){
-//         return -1;   
-//     }
-    
-//     if (diskimg_readsector(fs->dfd, real_block_num, buf) <0) {
-//         return -1;
-//     }
-
-//     int64_t num_blocks = size / DISKIMG_SECTOR_SIZE;
-//     int64_t aux = num_blocks % DISKIMG_SECTOR_SIZE;
-//     if (aux != 0) {
-//         num_blocks++;
-//     }
-//     if (blockNum < (num_blocks-1)){
-//         return DISKIMG_SECTOR_SIZE;
-//     }
-//     if (blockNum > (num_blocks-1)){
-//         return 0;
-//     }
-//     return size % DISKIMG_SECTOR_SIZE;
-// }
-
 int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *buf) {
-	// get inode content
-	struct inode my_inode;
-	int err = inode_iget(fs, inumber, &my_inode);
-	if(err < 0) return -1;
+    struct inode in;
+    if (inode_iget(fs, inumber, &in) < 0) {
+        return -1;
+    }
 
-	// get true block num
-	int sector = inode_indexlookup(fs, &my_inode, blockNum);
-	if(sector < 0) return -1;
+    int real_block_num = inode_indexlookup(fs, &in, blockNum);
+    if (real_block_num < 0){
+        return -1;   
+    }
+    
+    if (diskimg_readsector(fs->dfd, real_block_num, buf) <0) {
+        return -1;
+    }
 
-	// get block content
-	int read_err = diskimg_readsector(fs->dfd, sector, buf);
-	if(read_err < 0) return -1;
-
-	// get bytes and blocks
-	int total_bytes = inode_getsize(&my_inode);
-	if(total_bytes < 0) return -1;
-	int total_blocks = total_bytes / DISKIMG_SECTOR_SIZE;
-	if(blockNum == total_blocks) {
-		return total_bytes % DISKIMG_SECTOR_SIZE;
-	} else {
-		return DISKIMG_SECTOR_SIZE;
-	}
+    int size = inode_getsize(&in);
+    if (size < 0) { return -1; }
+    int num_blocks = size / DISKIMG_SECTOR_SIZE;
+    int aux = num_blocks % DISKIMG_SECTOR_SIZE;
+    if (aux != 0) {
+        num_blocks++;
+    }
+    if (blockNum < (num_blocks-1)){
+        return DISKIMG_SECTOR_SIZE;
+    }
+    return size % DISKIMG_SECTOR_SIZE;
 }
+
+// int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *buf) {
+// 	// get inode content
+// 	struct inode my_inode;
+// 	int err = inode_iget(fs, inumber, &my_inode);
+// 	if(err < 0) return -1;
+
+// 	// get true block num
+// 	int sector = inode_indexlookup(fs, &my_inode, blockNum);
+// 	if(sector < 0) return -1;
+
+// 	// get block content
+// 	int read_err = diskimg_readsector(fs->dfd, sector, buf);
+// 	if(read_err < 0) return -1;
+
+// 	// get bytes and blocks
+// 	int total_bytes = inode_getsize(&my_inode);
+// 	if(total_bytes < 0) return -1;
+// 	int total_blocks = total_bytes / DISKIMG_SECTOR_SIZE;
+// 	if(blockNum == total_blocks) {
+// 		return total_bytes % DISKIMG_SECTOR_SIZE;
+// 	} else {
+// 		return DISKIMG_SECTOR_SIZE;
+// 	}
+// }
