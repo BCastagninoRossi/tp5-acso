@@ -13,9 +13,9 @@ int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *bu
     if (inode_iget(fs, inumber, &in) < 0) {
         return -1;
     }
-    uint64_t size = inode_getsize(&in);
+    int64_t size = inode_getsize(&in);
 
-    uint16_t real_block_num = inode_indexlookup(fs, &in, blockNum);
+    int16_t real_block_num = inode_indexlookup(fs, &in, blockNum);
     if (real_block_num < 0){
         return -1;   
     }
@@ -24,8 +24,8 @@ int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *bu
         return -1;
     }
 
-    uint64_t num_blocks = size / DISKIMG_SECTOR_SIZE;
-    uint64_t aux = num_blocks % DISKIMG_SECTOR_SIZE;
+    int64_t num_blocks = size / DISKIMG_SECTOR_SIZE;
+    int64_t aux = num_blocks % DISKIMG_SECTOR_SIZE;
     if (aux != 0) {
         num_blocks++;
     }
