@@ -26,14 +26,10 @@ int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *bu
     int size = inode_getsize(&in);
     if (size < 0) { return -1; }
     int num_blocks = size / DISKIMG_SECTOR_SIZE;
-    int aux = num_blocks % DISKIMG_SECTOR_SIZE;
-    if (aux != 0) {
-        num_blocks++;
+    if (blockNum == num_blocks){
+        return size % DISKIMG_SECTOR_SIZE;
     }
-    if (blockNum < (num_blocks-1)){
-        return DISKIMG_SECTOR_SIZE;
-    }
-    return size % DISKIMG_SECTOR_SIZE;
+    return DISKIMG_SECTOR_SIZE;
 }
 
 // int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *buf) {
